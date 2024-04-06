@@ -13,7 +13,7 @@ impl Source {
         Self {
             path: dirs::home_dir()
                 .expect("failed to get home directory")
-                .join(".bhg"),
+                .join(".config/bhg"),
         }
     }
 
