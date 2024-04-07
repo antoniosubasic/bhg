@@ -1,133 +1,64 @@
 use chrono::prelude::*;
 use serde::Serialize;
-use serde_json::ser::PrettyFormatter;
-use serde_json::Value;
+use serde_json::{ser::PrettyFormatter, Value, Serializer};
 use std::{collections::HashMap, env, fs, path::PathBuf};
 
-struct Source {
+struct Variables {
     pub path: PathBuf,
+    pub variables: HashMap<String, Value>,
 }
 
-impl Source {
-    fn new() -> Self {
-        Self {
-            path: dirs::home_dir()
-                .expect("failed to get home directory")
-                .join(".config/bhg"),
-        }
-    }
+impl Variables {
+    fn new(base_path: &PathBuf) -> Self {
+        let path = base_path.join("variables.json");
 
-    fn config(&self) -> PathBuf {
-        self.path.join("config.json")
-    }
-
-    fn get_config(&self) -> HashMap<String, Value> {
-        serde_json::from_str(
-            &fs::read_to_string(self.config()).expect("failed to read config file"),
-        )
-        .expect("failed to parse config file")
-    }
-
-    fn get_variables(&self, description: &str) -> HashMap<String, Value> {
-        let mut config = self.get_config().to_owned();
+        let mut variables: HashMap<String, Value> =
+            serde_json::from_str(&fs::read_to_string(&path).expect("failed to read variables"))
+            .expect("failed to parse variables");
 
         let now = Local::now();
+        variables.insert("year".to_string(), Value::String(now.format("%Y").to_string()));
+        variables.insert("month".to_string(), Value::String(now.format("%m").to_string()));
+        variables.insert("day".to_string(), Value::String(now.format("%d").to_string()));
+        variables.insert("hour".to_string(), Value::String(now.format("%H").to_string()));
+        variables.insert("minute".to_string(), Value::String(now.format("%M").to_string()));
+        variables.insert("second".to_string(), Value::String(now.format("%S").to_string()));
+        variables.insert("microsecond".to_string(), Value::String(now.format("%f").to_string()));
+        variables.insert("weekday".to_string(), Value::String(now.format("%u").to_string()));
+        variables.insert("weekdayName".to_string(), Value::String(now.format("%A").to_string()));
+        variables.insert("monthName".to_string(), Value::String(now.format("%B").to_string()));
+        variables.insert("timestamp".to_string(), Value::String(now.timestamp().to_string()));
+        variables.insert("timestampMs".to_string(), Value::String(now.timestamp_millis().to_string()));
+        variables.insert("timestampISO".to_string(), Value::String(now.to_rfc3339()));
 
-        config.insert(
-            "description".to_string(),
-            Value::String(description.to_string()),
-        );
-        config.insert(
-            "year".to_string(),
-            Value::String(now.format("%Y").to_string()),
-        );
-        config.insert(
-            "month".to_string(),
-            Value::String(now.format("%m").to_string()),
-        );
-        config.insert(
-            "day".to_string(),
-            Value::String(now.format("%d").to_string()),
-        );
-        config.insert(
-            "hour".to_string(),
-            Value::String(now.format("%H").to_string()),
-        );
-        config.insert(
-            "minute".to_string(),
-            Value::String(now.format("%M").to_string()),
-        );
-        config.insert(
-            "second".to_string(),
-            Value::String(now.format("%S").to_string()),
-        );
-        config.insert(
-            "microsecond".to_string(),
-            Value::String(now.format("%f").to_string()),
-        );
-        config.insert(
-            "weekday".to_string(),
-            Value::String(now.format("%u").to_string()),
-        );
-        config.insert(
-            "weekdayName".to_string(),
-            Value::String(now.format("%A").to_string()),
-        );
-        config.insert(
-            "monthName".to_string(),
-            Value::String(now.format("%B").to_string()),
-        );
-        config.insert(
-            "timestamp".to_string(),
-            Value::String(now.timestamp().to_string()),
-        );
-        config.insert(
-            "timestampMs".to_string(),
-            Value::String(now.timestamp_millis().to_string()),
-        );
-        config.insert("timestampISO".to_string(), Value::String(now.to_rfc3339()));
-
-        config
-    }
-
-    fn get_default_config() -> HashMap<&'static str, Value> {
-        vec![("tabSize", Value::Number(serde_json::Number::from(4)))]
-            .into_iter()
-            .collect()
-    }
-
-    fn as_pathbuf(&self) -> PathBuf {
-        self.path.clone()
+        Self { path, variables }
     }
 }
 
 fn main() {
+    let base_path = dirs::home_dir().expect("failed to get home directory").join(".config/bhg");
     let args: Vec<String> = std::env::args().collect();
-    let source = Source::new();
+    let variables = Variables::new(&base_path);
 
-    match args.get(1).expect("no arguments provided").as_str() {
+    match args.get(1).expect("no arguments provid").as_str() {
         "--init" | "-i" => {
-            if source.config().exists() {
-                println!("config file already exists");
-                std::process::exit(1);
+            if variables.path.exists() {
+                println!("variables.json already exists");
             } else {
                 let formatter = PrettyFormatter::with_indent(b"    ");
                 let mut buffer = Vec::new();
-                let mut serializer = serde_json::Serializer::with_formatter(&mut buffer, formatter);
-                Source::get_default_config()
-                    .serialize(&mut serializer)
-                    .expect("failed to serialize config");
+                let mut serializer = Serializer::with_formatter(&mut buffer, formatter);
 
-                fs::create_dir_all(source.as_pathbuf()).expect("failed to create source directory");
-                fs::write(source.config(), buffer).expect("failed to write config file");
+                [("name".to_string(), Value::String("John Doe".to_string()))].serialize(&mut serializer).expect("failed to serialize variables");
+
+                fs::create_dir_all(variables.path.parent().expect("failed to get parent directory")).expect("failed to create directory");
+                fs::write(variables.path, buffer).expect("failed to create variables.json");
             }
         }
         _ => {
-            let variables = source.get_variables(&args[2..].join(" "));
-
             let output_file = env::current_dir()
                 .expect("failed to get current directory")
-                .join(args.get(1).expect("No output file provided"))
+                .join(args.get(1).expect("no output file provided"))
                 .to_owned();
 
             let file_extension = output_file
@@ -137,11 +68,10 @@ fn main() {
                 .last()
                 .expect("failed to get output file extension");
 
-            let mut content =
-                fs::read_to_string(source.as_pathbuf().join(format!("base.{}", file_extension)))
-                    .expect("failed to read base file");
+            let mut content = fs::read_to_string(base_path.join(format!("base.{}", file_extension))).expect("failed to read base file");
+            content = content.replace("{description}", &args[2..].join(" "));
 
-            for (key, value) in variables.iter() {
+            for (key, value) in variables.variables.iter() {
                 content = content.replace(&format!("{{{}}}", key), value.as_str().unwrap());
             }
 
