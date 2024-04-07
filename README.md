@@ -16,12 +16,12 @@ Or you can download the precompiled binary:
 
 # Setup
 
-1. Create a `.bhg` directory in your home directory `~`
+1. Create the `bhg` directory in the `.config` directory: `mkdir -p ~/.config/bhg`
 1. Inside the directory create a
-    - `config.json`, which contains constants that can be used as variables in the block-header
+    - `variables.json`, which contains constants that can be used as variables in the block-header
     - `base.<file extension>`, foreach each file type. Lines you want to be centered prefix with "->" <br> e.g.
-        - `bhg output.c` will access the `~/.bhg/base.c` file
-        - `bhg output.cpp` will access the `~/.bhg/base.cpp` file
+        - `bhg output.c` will access the `~/.config/bhg/base.c` file
+        - `bhg output.cpp` will access the `~/.config/bhg/base.cpp` file
 
 # Usage
 
@@ -52,7 +52,7 @@ Or you can download the precompiled binary:
 
 `bhg output.c This is a description`
 
-### ~/.bhg/config.json
+### ~/.config/bhg/variables.json
 
 ```json
 {
@@ -61,7 +61,7 @@ Or you can download the precompiled binary:
 }
 ```
 
-### ~/.bhg/base.c
+### ~/.config/bhg/base.c
 
 ```c
 /*
