@@ -7,7 +7,6 @@ description = "A simple Block Header Generator"
 repository = "https://github.com/antoniosubasic/bhg"
 license = "MIT"
 keywords = ["blockheader", "generator", "rust", "cli"]
-categories = ["cli"]
 readme = "README.md"
 documentation = "https://github.com/antoniosubasic/bhg#readme"
 
