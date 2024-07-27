@@ -32,7 +32,7 @@ impl Variables {
         variables.insert("weekdayName".to_string(), Value::String(now.format("%A").to_string()));
         variables.insert("monthName".to_string(), Value::String(now.format("%B").to_string()));
         variables.insert("timestamp".to_string(), Value::String(now.timestamp().to_string()));
-        variables.insert("timestampMs".to_string(), Value::String(now.timestamp_millis().to_string()));
+        variables.insert("timestampMS".to_string(), Value::String(now.timestamp_millis().to_string()));
         variables.insert("timestampISO".to_string(), Value::String(now.to_rfc3339()));
 
         Self {
