@@ -1,20 +1,24 @@
 use chrono::prelude::*;
 use serde::Serialize;
-use serde_json::{ser::PrettyFormatter, Value, Serializer};
+use serde_json::{ser::PrettyFormatter, Serializer, Value};
 use std::{collections::HashMap, env, fs, path::PathBuf};
 
 struct Variables {
+    pub directory: PathBuf,
     pub path: PathBuf,
-    pub variables: HashMap<String, Value>,
+    variables: HashMap<String, Value>,
 }
 
 impl Variables {
-    fn new(base_path: &PathBuf) -> Self {
-        let path = base_path.join("variables.json");
+    fn new() -> Self {
+        let directory = dirs::home_dir()
+            .expect("failed to get home directory")
+            .join(".config/bhg");
+        let path = directory.join("variables.json");
 
         let mut variables: HashMap<String, Value> =
             serde_json::from_str(&fs::read_to_string(&path).expect("failed to read variables"))
-            .expect("failed to parse variables");
+                .expect("failed to parse variables");
 
         let now = Local::now();
         variables.insert("year".to_string(), Value::String(now.format("%Y").to_string()));
@@ -31,27 +35,32 @@ impl Variables {
         variables.insert("timestampMs".to_string(), Value::String(now.timestamp_millis().to_string()));
         variables.insert("timestampISO".to_string(), Value::String(now.to_rfc3339()));
 
-        Self { path, variables }
+        Self {
+            directory,
+            path,
+            variables,
+        }
     }
 }
 
 fn main() {
-    let base_path = dirs::home_dir().expect("failed to get home directory").join(".config/bhg");
-    let args: Vec<String> = std::env::args().collect();
-    let variables = Variables::new(&base_path);
+    let variables = Variables::new();
+    let args: Vec<String> = env::args().collect();
 
-    match args.get(1).expect("no arguments provid").as_str() {
+    match args.get(1).expect("no arguments provided").as_str() {
         "--init" | "-i" => {
             if variables.path.exists() {
-                println!("variables.json already exists");
+                panic!("variables.json already exists");
             } else {
                 let formatter = PrettyFormatter::with_indent(b"    ");
                 let mut buffer = Vec::new();
                 let mut serializer = Serializer::with_formatter(&mut buffer, formatter);
 
-                [("name".to_string(), Value::String("John Doe".to_string()))].serialize(&mut serializer).expect("failed to serialize variables");
+                [("name", Value::String("John Doe".to_owned()))]
+                    .serialize(&mut serializer)
+                    .expect("failed to serialize variables");
 
-                fs::create_dir_all(variables.path.parent().expect("failed to get parent directory")).expect("failed to create directory");
+                fs::create_dir_all(variables.directory).expect("failed to create config directory");
                 fs::write(variables.path, buffer).expect("failed to create variables.json");
             }
         }
@@ -62,15 +71,16 @@ fn main() {
                 .to_owned();
 
             let file_extension = output_file
+                .extension()
+                .expect("failed to get output file extension")
                 .to_str()
-                .unwrap()
-                .split('.')
-                .last()
-                .expect("failed to get output file extension");
+                .expect("failed converting OsStr to string");
 
-            let mut content = fs::read_to_string(base_path.join(format!("base.{}", file_extension))).expect("failed to read base file");
+            let mut content =
+                fs::read_to_string(variables.directory.join(format!("base.{}", file_extension)))
+                    .expect("failed to read base file");
+
             content = content.replace("{description}", &args[2..].join(" "));
-
             for (key, value) in variables.variables.iter() {
                 content = content.replace(&format!("{{{}}}", key), value.as_str().unwrap());
             }
