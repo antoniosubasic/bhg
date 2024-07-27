@@ -5,12 +5,10 @@ edition = "2021"
 authors = ["Antonio Subašić <antonio@subasic.me>"]
 description = "A simple Block Header Generator"
 repository = "https://github.com/antoniosubasic/bhg"
-license = "MIT"
+license-file = "LICENSE"
 keywords = ["blockheader", "generator", "rust", "cli"]
 readme = "README.md"
 documentation = "https://github.com/antoniosubasic/bhg#readme"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 dirs = "5.0.1"
