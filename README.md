@@ -39,7 +39,7 @@ bhg <output file> <description>
 | weekdayName  |             the current weekday name              |
 |  monthName   |              the current month name               |
 |  timestamp   |               the current timestamp               |
-| timestampMs  |       the current timestamp in milliseconds       |
+| timestampMS  |       the current timestamp in milliseconds       |
 | timestampISO |        the current timestamp in ISO format        |
 
 ## Example
