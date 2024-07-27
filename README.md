@@ -1,33 +1,27 @@
-bhg is a simple block-header-generator written in Rust
+a simple _Block Header Generator_
 
 # Download
 
-You can either download the source code and compile the program yourself:
-
-1. [Download the Source Code](https://github.com/antonio-subasic/bhg/archive/refs/heads/main.zip)
-1. Unzip the folder
-1. Run `cargo build --release`
-1. Copy the executable from `target/release/` to `/usr/local/bin/`: `sudo cp target/release/bhg /usr/local/bin/bhg`
-
-Or you can download the precompiled binary:
-
-1. [Download the binary](https://github.com/antonio-subasic/bhg/releases)
-1. Move the binary to `/usr/local/bin/`: `sudo cp bhg /usr/local/bin/bhg`
+```bash
+cargo install bhg
+```
 
 # Setup
 
 1. Create the `bhg` directory in the `.config` directory: `mkdir -p ~/.config/bhg`
 1. Inside the directory create a
     - `variables.json`, which contains constants that can be used as variables in the block-header
-    - `base.<file extension>`, foreach each file type. Lines you want to be centered prefix with "->" <br> e.g.
-        - `bhg output.c` will access the `~/.config/bhg/base.c` file
-        - `bhg output.cpp` will access the `~/.config/bhg/base.cpp` file
+    - `base.<file extension>` - for each file type
+        - `bhg output.c` will use the `~/.config/bhg/base.c` as a base file
+        - `bhg output.rs` will use the `~/.config/bhg/base.rs` as a base file
 
 # Usage
 
 ## Command
 
-`bhg <output file> <description>`
+```bash
+bhg <output file> <description>
+```
 
 ## Special Variables
 
@@ -50,9 +44,11 @@ Or you can download the precompiled binary:
 
 ## Example
 
-`bhg output.c This is a description`
+```bash
+bhg output.c This is a description
+```
 
-### ~/.config/bhg/variables.json
+### variables file
 
 ```json
 {
@@ -61,7 +57,7 @@ Or you can download the precompiled binary:
 }
 ```
 
-### ~/.config/bhg/base.c
+### base.c file - lines prefixed with `->` will be centered
 
 ```c
 /*
@@ -77,7 +73,7 @@ This line won't be centered {weekdayName}
 */
 ```
 
-### output.c
+### output.c file - generated in the current working directory
 
 ```c
 /*
