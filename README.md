@@ -1,3 +1,6 @@
+[![Version](https://img.shields.io/crates/v/bhg)](https://crates.io/crates/bhg)
+[![Downloads](https://img.shields.io/crates/dv/bhg?label=Downloads)](https://crates.io/crates/bhg)
+
 a simple _Block Header Generator_
 
 # Download
