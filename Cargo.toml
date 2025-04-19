@@ -2,7 +2,7 @@
 name = "bhg"
 version = "0.1.2"
 edition = "2021"
-authors = ["Antonio Subašić <antonio@subasic.me>"]
+authors = ["Antonio Subašić <antonio.subasic.public@gmail.com>"]
 description = "A simple Block Header Generator"
 repository = "https://github.com/antoniosubasic/bhg"
 license-file = "LICENSE"
